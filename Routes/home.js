@@ -45,6 +45,17 @@ route.get("/showAll", function(req, res){
     })
 })
 
+route.get("/details/:id", function(req, res){
+    product.find({_id: req.params.id}, function(err,result){
+        if(err){
+            console.log(err)
+        }
+        else{
+            res.send(result)
+        }
+    })
+})
+
 route.get("/getCategory", function(req, res){
     category.find(function(err, result){
         if(err){
