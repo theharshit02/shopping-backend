@@ -34,15 +34,31 @@ const category = mongoose.model("Category", categorySchema)
 const brand = mongoose.model("Brand", brandSchema)
 const color = mongoose.model("Color", colorSchema)
 
-route.get("/showAll", function(req, res){
-    product.find(function(err, result){
-        if(err){
-            console.log(err)
-        }
-        else{
-            res.send(result)
-        }
-    })
+route.get("/showAll", async function(req, res){
+    const sort = req.query.sort
+    const search = req.query.search
+    const category = req.query.category
+    const brand = req.query.brand
+    const color = req.query.color
+    const value = req.query.value
+    const shipping = req.query.shipping
+
+    if(sort === "low"){
+        const result = await product.find({categories: category==="All"?{$exists: true}:category, brand: brand==="All"?{$exists: true}:brand, color: color==="All"?{$exists: true}:color, freeShipping: shipping==="false"?{$exists: true}:"true", name: search===""?{$exists: true}:{$regex: `${search}`, $options: "$i"}, price: {$gt: value}}).sort({price: 1})
+        res.send(result)
+    }
+    else if(sort === "high"){
+        const result = await product.find({categories: category==="All"?{$exists: true}:category, brand: brand==="All"?{$exists: true}:brand, color: color==="All"?{$exists: true}:color, freeShipping: shipping==="false"?{$exists: true}:"true", name: search===""?{$exists: true}:{$regex: `${search}`, $options: "$i"}, price: {$gt: value}}).sort({price: -1})
+        res.send(result)
+    }
+    else if(sort === "asc"){
+        const result = await product.find({categories: category==="All"?{$exists: true}:category, brand: brand==="All"?{$exists: true}:brand, color: color==="All"?{$exists: true}:color, freeShipping: shipping==="false"?{$exists: true}:"true", name: search===""?{$exists: true}:{$regex: `${search}`, $options: "$i"}, price: {$gt: value}}).sort({name: 1})
+        res.send(result)
+    }
+    else if(sort === "desc"){
+        const result = await product.find({categories: category==="All"?{$exists: true}:category, brand: brand==="All"?{$exists: true}:brand, color: color==="All"?{$exists: true}:color, freeShipping: shipping==="false"?{$exists: true}:"true", name: search===""?{$exists: true}:{$regex: `${search}`, $options: "$i"}, price: {$gt: value}}).sort({name: -1})
+        res.send(result)
+    }
 })
 
 route.get("/details/:id", function(req, res){
@@ -87,43 +103,6 @@ route.get("/getColor", function(req, res){
             res.send(result)
         }
     })
-})
-
-route.post("/insert", async function(req, res){
-    // var newObj = new product({
-    //     name: "Shelf",
-    //     image: ["https://m.media-amazon.com/images/I/61ftPN+jalL._SL1080_.jpg", "https://m.media-amazon.com/images/I/51wruirfPlL._SL1000_.jpg", "https://m.media-amazon.com/images/I/61wzYtt459L._SL1080_.jpg"],
-    //     price: 100,
-    //     description: "Marvelous shelf",
-    //     availability: true,
-    //     SKU: "dkgjblkq23klhb23lkh",
-    //     brand: "Genuine Decor",
-    //     rating: 3,
-    //     cstmrCount: 227,
-    //     categories: "Living Room",
-    //     color: "Brown",
-    //     freeShipping: true,
-    // })
-
-
-    // var newObj = new category({
-    //     category: "Kids"
-    // })
-
-    // var newobj1 = new brand({
-    //     brand: "Starmarks"
-    // })
-
-    // await newObj.save()
-    // await newobj1.save()
-
-
-    var newObj = new color({
-        color: "plum"
-    })
-
-    newObj.save()
-    res.send("done")
 })
 
 module.exports = route
